@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>ThingSpeak Multi-Field</title>
+    <style>
+        .statusBtn {
+            padding: 15px 30px;
+            font-size: 16px;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Trạng thái các bồn:</h2>
+
+    <div id="buttonsContainer">
+        <!-- Nút sẽ được tạo tự động -->
+    </div>
+
+    <script>
+        const channelID = "2885434";      
+        const fieldCount = 6;             
+
+        const apiURL = `https://api.thingspeak.com/channels/2885434/feeds.json?api_key=I7VSU4UATRG89MJU&results=1`;
+
+        function updateFields() {
+            fetch(apiURL)
+                .then(response => response.json())
+                .then(data => {
+                    const feed = data.feeds[0];
+                    const container = document.getElementById("buttonsContainer");
+                    container.innerHTML = ""; // Xóa nút cũ
+
+                    for (let i = 1; i <= fieldCount; i++) {
+                        const value = feed[`field${i}`];
+                        const button = document.createElement("button");
+                        button.className = "statusBtn";
+
+                        if (value === "1" || value === "1HTTP/1.1") {
+                            button.style.backgroundColor = "blue";
+                            button.innerText = `Bồn số ${i}: BẬT`;
+                        } else if (value === "0" || value === "0HTTP/1.1") {
+                            button.style.backgroundColor = "red";
+                            button.innerText = `Bồn số ${i}: TẮT`;
+                        } else {
+                            button.style.backgroundColor = "gray";
+                            button.innerText = `Bồn số ${i}:`;
+                        }
+
+                        container.appendChild(button);
+                    }
+                })
+                .catch(error => {
+                    console.error("Lỗi:", error);
+                    document.getElementById("buttonsContainer").innerHTML = "Không lấy được dữ liệu.";
+                });
+        }
+
+        // Gọi lần đầu và cập nhật mỗi 5 giây
+        updateFields();
+        setInterval(updateFields, 5000);
+    </script>
+</body>
+</html>
